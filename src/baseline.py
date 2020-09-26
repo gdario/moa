@@ -7,6 +7,8 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_validate, StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier
+
 
 train_ft = pd.read_csv(constants.DATA_DIR/'train_features.csv')
 train_tgt_sc = pd.read_csv(constants.DATA_DIR/'train_targets_scored.csv')
@@ -32,3 +34,6 @@ y = train_y.iloc[:, 1:train_y.shape[1]].values
 
 x_tr, x_val, y_tr, y_val = train_test_split(
     x, y, test_size=4000, random_state=42)
+
+# pipeline
+rf = RandomForestClassifier()
