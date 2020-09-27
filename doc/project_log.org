@@ -41,6 +41,12 @@ Adding column-wise the entries in the data returns the number of responses in ea
 
 We would expect compounds with similar profiles to have similar responses. Is this the case?
 
+** TODO Understand the metric
+What metric is being used in [[https://www.kaggle.com/fchmiel/xgboost-baseline-multilabel-classification][this notebook]]?
+
+** TODO Difference between OneVsRestClassifier and MultiOutputClassifier
+What is the difference between the two?
+
 ** TODO Use logging
 ** TODO Check the scoring function
 ** TODO remember to fill the y for the vehicles with zeros.

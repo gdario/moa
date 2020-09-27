@@ -6,8 +6,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import cross_validate, StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.lin
+from xgboost import XGBClassifier
 
 
 train_ft = pd.read_csv(constants.DATA_DIR/'train_features.csv')
@@ -34,3 +37,12 @@ y = train_y.iloc[:, 1:train_y.shape[1]].values
 
 x_tr, x_val, y_tr, y_val = train_test_split(
     x, y, test_size=4000, random_state=42)
+
+# # XGBoostClassifier
+# params = {'max_depth': 2, 'eta': 1, 'objective': 'multi:softprob',
+#           'eval_metric': 'mlogloss', 'num_class': 5, 'subsample': 0.8,
+#           'colsample_bytree': 0.8}
+# clf = OneVsRestClassifier(XGBClassifier(**params))
+# clf.fit(x_tr[:1000], y_tr[:1000])
+# pred_val = clf.predict(x_val)
+# print(classification_report(y_val, pred_val))
