@@ -1,36 +1,22 @@
 import os
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.compose import ColumnTransformer
+import utils
 
-train_data = pd.read_csv('../data/train_features.csv')
-test_data = pd.read_csv('../data/test_features.csv')
+SAVE_IMAGES = True
+
+datafiles = ['../data/train_features.csv', '../data/test_features.csv']
+datasets = [pd.read_csv(f) for f in datafiles]
 train_targets = pd.read_csv('../data/train_targets_scored.csv')
 
-idx_trt_train = train_data.cp_type == 'trt_cp'
-idx_trt_test = test_data.cp_type == 'trt_cp'
+idx_trt = [df.cp_type == 'trt_cp' for df in datasets]
+sig_ids = [df.sig_id[df.cp_type == 'trt_cp'].values for df in datasets]
 
-train_novehicle = train_data.loc[idx_trt_train]
-test_novehicle = test_data.loc[idx_trt_test]
-targets_novehicle = train_targets.loc[idx_trt_train]
+image_arrays = utils.create_image_arrays(datasets)
 
-coltran = ColumnTransformer([
-    ('ohe', OneHotEncoder(), ['cp_dose']),
-    ('minmax', MinMaxScaler(), ['cp_time']),
-    ('drop_id', 'drop', ['sig_id', 'cp_type']),
-
-], remainder=StandardScaler())
-
-coltran.fit(train_novehicle)
-train_x = coltran.transform(train_novehicle)
-test_x = coltran.transform(test_novehicle)
-
-padded_x_train = np.pad(train_x, ((0, 0), (12, 13)), 'constant',
-                        constant_values=0).reshape(-1, 30, 30, 1)
-padded_x_test = np.pad(test_x, ((0, 0), (12, 13)), 'constant',
-                       constant_values=0).reshape(-1, 30, 30, 1)
-
-x_train = np.repeat(padded_x_train, 3, axis=3).astype('float32')
-x_test = np.repeat(padded_x_test, 3, axis=3).astype('float32')
+if SAVE_IMAGES:
+    out_folders = ['../images/train', '../images/test']
+    for i in range(len(image_arrays)):
+        if not os.path.exists(out_folders[i]):
+            os.makedirs(out_folders[i])
+        print('Populating {}'.format(out_folders[i]))
+        utils.save_images(image_arrays[i], sig_ids[i],
+                          out_folders[i])
