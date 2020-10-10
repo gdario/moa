@@ -37,23 +37,16 @@ def create_image_arrays(df_list):
     return image_arrays
 
 
-def create_fname(dataset, img_folder):
+def create_fname(dataset):
     """Create the full path to an image file."""
-    dataset['fname'] = img_folder + dataset.sig_id + '.png'
+    dataset['fname'] = dataset.sig_id + '.jpg'
     return dataset
 
 
-def save_image(img, filename):
+def save_image(img, filename, folder):
     """Save an array as an image to a given filename."""
     data = Image.fromarray(img)
-    data.save(filename)
-
-
-# def save_images(x, dest_files):
-#     """Save an image array to an image file."""
-#     for i in range(len(dest_files)):
-#         data = Image.fromarray(x[i])
-#         data.save(dest_files[i])
+    data.save(os.path.join(folder, filename))
 
 
 def add_validation_flag(dataset, val_frac=0.2, seed=42):
