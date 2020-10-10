@@ -60,10 +60,17 @@ def add_validation_flag(dataset, val_frac=0.2, seed=42):
     return dataset
 
 
+def map_to_lab(targets, labels):
+    out = labels[targets == 1]
+    if len(out) == 0:
+        return 'none'
+    else:
+        return ' '.join(out.tolist())
+
+
 def map_to_labels(targets, labels):
+    X = targets.iloc[:, 1:].values
     out = []
-    for i in range(targets.shape[0]):
-        x = targets.iloc[i, 1:].values
-        res = ' '.join(labels[x == 1].tolist())
-        out.append(res)
+    for i in range(X.shape[0]):
+        out.append(map_to_lab(X[i], labels))
     return out
