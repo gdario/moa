@@ -21,16 +21,13 @@ def fill_results(idx_cp, results):
     return out
 
 
-def create_image_arrays(df_list, remove_vehicles=False):
+def create_image_arrays(df_list):
+    """Convert a list of data frames into a list of image-like arrays."""
     assert len(df_list) == 2, "df_list must contain two data frames."
     coltran = ColumnTransformer([
         ('ohe', OneHotEncoder(), ['cp_dose']),
         ('drop_id', 'drop', ['sig_id', 'cp_type']),
     ], remainder=MinMaxScaler(feature_range=(0, 255)))
-
-    if remove_vehicles:
-        df_list = [df[df.cp_type == 'trt_cp'] for df in df_list]
-
     coltran.fit(df_list[0])
     transformed_df = [coltran.transform(df) for df in df_list]
     padded_df = [np.pad(df, ((0, 0), (12, 13)), 'constant',
@@ -40,25 +37,34 @@ def create_image_arrays(df_list, remove_vehicles=False):
     return image_arrays
 
 
-def create_fname(df, img_folder):
-    df['fname'] = img_folder + df.sig_id + '.png'
-    return df
+def create_fname(dataset, img_folder):
+    """Create the full path to an image file."""
+    dataset['fname'] = img_folder + dataset.sig_id + '.png'
+    return dataset
 
 
-def save_images(x, dest_files):
-    for i in range(len(dest_files)):
-        data = Image.fromarray(x[i])
-        data.save(dest_files[i])
+def save_image(img, filename):
+    """Save an array as an image to a given filename."""
+    data = Image.fromarray(img)
+    data.save(filename)
 
 
-def add_validation_flag(df, val_frac=0.2, seed=42):
-    n_obs = df.shape[0]
+# def save_images(x, dest_files):
+#     """Save an image array to an image file."""
+#     for i in range(len(dest_files)):
+#         data = Image.fromarray(x[i])
+#         data.save(dest_files[i])
+
+
+def add_validation_flag(dataset, val_frac=0.2, seed=42):
+    """Add the 'is_valid' column."""
+    n_obs = dataset.shape[0]
     n_valid = int(n_obs*val_frac)
     np.random.seed(seed)
     idx = np.random.choice(np.arange(n_obs), size=n_valid, replace=False)
-    df['is_valid'] = False
-    df['is_valid'].iloc[idx] = True
-    return df
+    dataset['is_valid'] = False
+    dataset['is_valid'].iloc[idx] = True
+    return dataset
 
 
 def map_to_labels(targets, labels):

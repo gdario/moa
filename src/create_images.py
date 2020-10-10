@@ -26,8 +26,12 @@ if SAVE_IMAGES:
         if not os.path.exists(img_folders[i]):
             os.makedirs(img_folders[i])
         print('Populating {}'.format(img_folders[i]))
-        utils.save_images(image_arrays[i], datasets_trt[i].fname)
+        for j in range(image_arrays[i].shape[0]):
+            utils.save_image(image_arrays[i][j], datasets_trt[i].fname.iloc[j])
 
-# datasets_trt[0] = utils.add_validation_flag(datasets_trt[0])
-# datasets_trt[0]['labels'] = utils.map_to_labels(
-#     train_targets, np.array(train_targets.columns[1:].tolist()))
+datasets_trt[0] = utils.add_validation_flag(datasets_trt[0])
+datasets_trt[0]['labels'] = utils.map_to_labels(
+    train_targets, np.array(train_targets.columns[1:].tolist()))
+
+datasets_trt[0][['sig_id', 'fname', 'labels', 'is_valid']].to_csv(
+    '../data/fastai_multilabel_df.csv', index=False)
