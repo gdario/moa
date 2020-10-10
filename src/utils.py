@@ -21,16 +21,16 @@ def fill_results(idx_cp, results):
     return out
 
 
-def create_image_arrays(df_list, remove_vehicles=True):
+def create_image_arrays(df_list, remove_vehicles=False):
     assert len(df_list) == 2, "df_list must contain two data frames."
     coltran = ColumnTransformer([
-            ('ohe', OneHotEncoder(), ['cp_dose']),
-            ('drop_id', 'drop', ['sig_id', 'cp_type']),
-        ], remainder=MinMaxScaler(feature_range=(0, 255)))
+        ('ohe', OneHotEncoder(), ['cp_dose']),
+        ('drop_id', 'drop', ['sig_id', 'cp_type']),
+    ], remainder=MinMaxScaler(feature_range=(0, 255)))
 
     if remove_vehicles:
         df_list = [df[df.cp_type == 'trt_cp'] for df in df_list]
-    
+
     coltran.fit(df_list[0])
     transformed_df = [coltran.transform(df) for df in df_list]
     padded_df = [np.pad(df, ((0, 0), (12, 13)), 'constant',
@@ -40,9 +40,31 @@ def create_image_arrays(df_list, remove_vehicles=True):
     return image_arrays
 
 
-def save_images(x, sig_ids, img_folder):
-    dest_files = [os.path.join(img_folder, sig_id + '.png')
-                  for sig_id in sig_ids]
+def create_fname(df, img_folder):
+    df['fname'] = img_folder + df.sig_id + '.png'
+    return df
+
+
+def save_images(x, dest_files):
     for i in range(len(dest_files)):
         data = Image.fromarray(x[i])
         data.save(dest_files[i])
+
+
+def add_validation_flag(df, val_frac=0.2, seed=42):
+    n_obs = df.shape[0]
+    n_valid = int(n_obs*val_frac)
+    np.random.seed(seed)
+    idx = np.random.choice(np.arange(n_obs), size=n_valid, replace=False)
+    df['is_valid'] = False
+    df['is_valid'].iloc[idx] = True
+    return df
+
+
+def map_to_labels(targets, labels):
+    out = []
+    for i in range(targets.shape[0]):
+        x = targets.iloc[i, 1:].values
+        res = ' '.join(labels[x == 1].tolist())
+        out.append(res)
+    return out

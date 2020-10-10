@@ -1,4 +1,6 @@
+import numpy as np
 import os
+import pandas as pd
 import utils
 
 SAVE_IMAGES = True
@@ -8,15 +10,24 @@ datasets = [pd.read_csv(f) for f in datafiles]
 train_targets = pd.read_csv('../data/train_targets_scored.csv')
 
 idx_trt = [df.cp_type == 'trt_cp' for df in datasets]
-sig_ids = [df.sig_id[df.cp_type == 'trt_cp'].values for df in datasets]
+train_targets = train_targets.loc[idx_trt[0]]
 
-image_arrays = utils.create_image_arrays(datasets)
+datasets_trt = [datasets[i].loc[idx_trt[i]] for i in range(len(datasets))]
+image_arrays = utils.create_image_arrays(datasets_trt)
+
+img_folders = ['../images/train/', '../images/test/']
+datasets_trt = [utils.create_fname(datasets_trt[i], img_folders[i])
+                for i in range(len(datasets_trt))]
+
+# sig_ids = [df.sig_id.values for df in datasets_trt]
 
 if SAVE_IMAGES:
-    out_folders = ['../images/train', '../images/test']
     for i in range(len(image_arrays)):
-        if not os.path.exists(out_folders[i]):
-            os.makedirs(out_folders[i])
-        print('Populating {}'.format(out_folders[i]))
-        utils.save_images(image_arrays[i], sig_ids[i],
-                          out_folders[i])
+        if not os.path.exists(img_folders[i]):
+            os.makedirs(img_folders[i])
+        print('Populating {}'.format(img_folders[i]))
+        utils.save_images(image_arrays[i], datasets_trt[i].fname)
+
+# datasets_trt[0] = utils.add_validation_flag(datasets_trt[0])
+# datasets_trt[0]['labels'] = utils.map_to_labels(
+#     train_targets, np.array(train_targets.columns[1:].tolist()))
