@@ -1,0 +1,13 @@
+* =create_images.org=
+
+** Issues
+
+*** What is the best way to conver a NumPy array to an image?
+
+- What type of normalization should be used on each feature?
+- And on each instance?
+
+*** Creating a preprocessing function
+
+The main problem is that the column transformer must be fitted on the training test set only and that ~.fit_transform()~ should be used on both the training and test, which is not so obvious in a function that is supposed to receive either data frame as an argument.
+
