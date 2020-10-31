@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import utils
 
-SAVE_IMAGES = False
+SAVE_IMAGES = True
 
 datafiles = ['../data/train_features.csv', '../data/test_features.csv']
 datasets = [pd.read_csv(f) for f in datafiles]
