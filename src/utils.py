@@ -5,6 +5,15 @@ from PIL import Image
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.compose import ColumnTransformer
+from constants import DATA_DIR
+
+
+def load_data(data_dir=DATA_DIR):
+    train = pd.read_csv(data_dir/'train_features.csv')
+    targets = pd.read_csv(data_dir/'train_targets_scored.csv')
+    test = pd.read_csv(data_dir/'test_features.csv')
+    sub = pd.read_csv(data_dir/'sample_submission.csv')
+    return train, targets, test, sub
 
 
 def fill_results(idx_cp, results):
@@ -74,3 +83,17 @@ def map_to_labels(targets, labels):
     for i in range(X.shape[0]):
         out.append(map_to_lab(X[i], labels))
     return out
+
+
+def prepare_submission(model, dataset, sub_template):
+    assert dataset.shape[0] == sub_template.shape[0]
+    submission = sub_template.copy()
+    col_idx = submission.columns[1:]
+    idx_veh = dataset.cp_type == 'ctl_vehicle'
+    row_idx_veh = dataset.index[idx_veh]
+    row_idx_trt = dataset.index[~idx_veh]
+    data_no_vehicle = dataset[~idx_veh]
+    y_pred = model.predict_proba(data_no_vehicle)
+    submission.loc[row_idx_veh, col_idx] = 0.0
+    submission.loc[row_idx_trt, col_idx] = y_pred
+    return submission
